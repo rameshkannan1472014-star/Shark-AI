@@ -1,6 +1,5 @@
-/* Shark v1 — plan, code, deploy, bugs, launch. Local-first; only the AI brain
-   needs the internet. GitHub connection is a personal access token kept on
-   this device only. */
+/* Shark v3 — Ramesh's layout: menu · Chat | Preview on top, logo in the
+   middle, "Let's build" composer with + · Agent · send at the bottom. */
 (function () {
   "use strict";
   var store = {
@@ -8,24 +7,41 @@
     set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} }
   };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var $ = function (id) { return document.getElementById(id); };
 
-  /* ---------- goal: first 10,000 users ---------- */
+  /* ---------- drawer ---------- */
+  var drawer = $("drawer"), scrim = $("scrim");
+  function openDrawer(o) { drawer.classList.toggle("open", o); scrim.classList.toggle("show", o); }
+  $("menu-btn").addEventListener("click", function () { openDrawer(true); });
+  scrim.addEventListener("click", function () { openDrawer(false); });
+
+  /* ---------- Chat | Preview ---------- */
+  function show(view) {
+    $("view-chat").hidden = view !== "chat";
+    $("view-pv").hidden = view !== "pv";
+    $("seg-chat").classList.toggle("on", view === "chat");
+    $("seg-pv").classList.toggle("on", view === "pv");
+  }
+  $("seg-chat").addEventListener("click", function () { show("chat"); });
+  $("seg-pv").addEventListener("click", function () { show("pv"); });
+
+  /* ---------- goal ---------- */
   var GOAL = 10000;
   function goal() { return store.get("shark-users", 0); }
   function renderGoal() {
     var n = goal();
-    document.getElementById("goal-n").textContent = n.toLocaleString("en-IN") + " / 10,000 users";
-    document.getElementById("goal-fill").style.width = Math.min(100, n / GOAL * 100) + "%";
+    $("goal-n").textContent = n.toLocaleString("en-IN") + " / 10,000 users";
+    $("goal-fill").style.width = Math.min(100, n / GOAL * 100) + "%";
   }
-  document.getElementById("goal-edit").addEventListener("click", function () {
+  function setUsers() {
     var v = prompt("How many users do you have right now?", String(goal()));
     if (v == null) return;
     v = Math.max(0, Math.min(GOAL, parseInt(v, 10) || 0));
     store.set("shark-users", v);
     renderGoal();
-    say("ai", v >= GOAL ? "10,000! You did it. Time to plan the next 100,000. 🦈" : "Updated. " + v + " down, " + (GOAL - v) + " to go. Every step below moves it.");
-    checkStage("launch");
-  });
+    say("ai", v >= GOAL ? "10,000! You did it. Time to plan the next 100,000. 🦈" : "Updated — " + v + " down, " + (GOAL - v) + " to go.");
+  }
+  $("goal-edit").addEventListener("click", setUsers);
 
   /* ---------- stages ---------- */
   var STAGES = [
@@ -35,90 +51,64 @@
     { id: "bugs", icon: "🔍", label: "Bugs" },
     { id: "launch", icon: "📣", label: "Launch" }
   ];
-  function stageDone(id) { return !!store.get("shark-stage-" + id, false); }
+  var tab = "plan";
+  function done(id) { return !!store.get("shark-stage-" + id, false); }
   function renderStages() {
-    var el = document.getElementById("stages");
-    el.innerHTML = STAGES.map(function (s, i) {
-      var cls = "stage" + (stageDone(s.id) ? " done" : "") + (!stageDone(s.id) && (i === 0 || stageDone(STAGES[i - 1].id)) ? " now" : "");
+    $("stages").innerHTML = STAGES.map(function (s, i) {
+      var cls = "stage" + (done(s.id) ? " done" : "") + (!done(s.id) && (i === 0 || done(STAGES[i - 1].id)) ? " now" : "");
       return '<button class="' + cls + '" data-stage="' + s.id + '"><b>' + s.icon + "</b>" + s.label + "</button>";
     }).join("");
   }
-  document.getElementById("stages").addEventListener("click", function (e) {
+  $("stages").addEventListener("click", function (e) {
     var b = e.target.closest("[data-stage]");
     if (!b) return;
-    setTab(b.dataset.stage);
-    document.getElementById("q").focus();
+    tab = b.dataset.stage; agent = null; agentBtn();
+    openDrawer(false);
+    say("ai", "Switched to **" + b.dataset.stage + "**. Ask me your question.");
+    $("q").focus();
   });
-  function checkStage(id) {
-    renderStages();
-  }
-  function markStage(id) {
-    store.set("shark-stage-" + id, true);
-    renderStages();
-  }
 
   /* ---------- chat ---------- */
   var TAB_PROMPT = {
-    plan: "You are Shark's Planner. Turn the user's app idea into a sharp 1-week plan: the exact user, the painful problem, the 3 core features (and what to cut), and day-by-day steps. Keep it short, concrete, no fluff.",
-    code: "You are Shark's Coder. Write real, working code the user can paste and run. Prefer one file, plain HTML/CSS/JS. Explain in 2 short lines, then the code in a fenced block, then how to run it.",
-    deploy: "You are Shark's Deployer. Give the exact steps to put this online free: GitHub Pages (or Render for backends), custom wording for each click, and how to check it's live. Ask what kind of app they have first if unclear.",
-    bugs: "You are Shark's Bug Hunter. When they paste an error or describe what's broken, give the most likely cause first, then the exact fix with code, then one way to check it's fixed. Ask for the error text if they didn't paste it.",
-    launch: "You are Shark's Launch Coach. The goal is the first 10,000 users. Give 3 concrete places to post this week (school, WhatsApp groups, Reddit/Discord/Play Store), the exact first message to send, and how to count signups. Pushy but friendly."
+    plan: "You are Shark's Planner. Turn the idea into a sharp 1-week plan: the exact user, the painful problem, the 3 core features (and what to cut), day-by-day steps. Short, concrete, no fluff.",
+    code: "You are Shark's Coder. Write real working code the user can paste and run. One file, plain HTML/CSS/JS. Two short lines, then a fenced code block, then how to run it.",
+    deploy: "You are Shark's Deployer. Exact steps to put this online free: GitHub Pages (or Render for backends), each click, how to check it's live. Ask what kind of app first if unclear.",
+    bugs: "You are Shark's Bug Hunter. Most likely cause first, then the exact fix with code, then how to check. Ask for the error text if missing.",
+    launch: "You are Shark's Launch Coach. Goal: first 10,000 users. 3 concrete places to post this week, the exact first message, how to count signups. Pushy but friendly."
   };
   var AGENT_PROMPT = {
-    planner: TAB_PROMPT.plan,
-    coder: TAB_PROMPT.code,
-    reviewer: "You are Shark's Reviewer. When they paste code, find the 3 riskiest bugs or slow parts, show the fixed lines, and say what to test. If no code is pasted, ask for it.",
-    deployer: TAB_PROMPT.deploy
+    planner: TAB_PROMPT.plan, coder: TAB_PROMPT.code, deployer: TAB_PROMPT.deploy,
+    reviewer: "You are Shark's Reviewer. When code is pasted, find the 3 riskiest bugs or slow parts, show fixed lines, say what to test. If no code, ask for it."
   };
-  var tab = "plan", agent = null;
-  function setTab(t) {
-    tab = t; agent = null;
-    document.querySelectorAll(".tab").forEach(function (b) { b.classList.toggle("is-on", b.dataset.tab === t); });
+  var agent = null;
+  var log = $("log"), empty = $("empty");
+  function agentBtn() {
+    var b = $("agent-btn");
+    b.textContent = agent ? { planner: "🧭 Planner", coder: "💻 Coder", reviewer: "🔍 Reviewer", deployer: "🚀 Deployer" }[agent] : "Agent";
+    b.classList.toggle("has", !!agent);
   }
-  document.querySelectorAll(".tab").forEach(function (b) {
-    b.addEventListener("click", function () { setTab(b.dataset.tab); });
-  });
-  document.querySelectorAll("[data-agent]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      agent = b.dataset.agent;
-      say("ai", agentLabel(agent) + " reporting. Tell me what you're building (or paste code for me to review).");
-      document.getElementById("q").focus();
-    });
-  });
-  function agentLabel(a) {
-    return { planner: "🧭 Planner", coder: "💻 Coder", reviewer: "🔍 Reviewer", deployer: "🚀 Deployer" }[a] || a;
-  }
-
-  var log = document.getElementById("log");
   function say(role, text) {
+    empty.style.display = "none";
     var d = document.createElement("div");
     d.className = "msg " + role;
-    d.innerHTML = fmt(text);
+    var h = esc(text).replace(/```(\w*\n?)([\s\S]*?)```/g, function (_, l, c) { return "<pre><code>" + c.replace(/^\n/, "") + "</code></pre>"; });
+    d.innerHTML = h.replace(/\n/g, "<br>");
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
     return d;
   }
-  function fmt(t) {
-    var h = esc(t);
-    h = h.replace(/```(\w*\n?)([\s\S]*?)```/g, function (_, l, c) { return "<pre><code>" + c.replace(/^\n/, "") + "</code></pre>"; });
-    h = h.replace(/`([^`\n]+)`/g, "<code>$1</code>");
-    return h.replace(/\n/g, "<br>");
-  }
-  var brain = "https://text.pollinations.ai/openai";
   var lastCall = 0;
-  async function askAI(prompt) {
+  async function brain(prompt) {
     var gap = 31000 - (Date.now() - lastCall);
     if (gap > 0) {
-      var wait = say("ai", "Shark is catching its breath… answering in " + Math.ceil(gap / 1000) + "s (free AI limit).");
+      var w = say("ai", "Catching breath… answering in " + Math.ceil(gap / 1000) + "s (free AI limit).");
       await new Promise(function (r) { setTimeout(r, gap); });
-      wait.remove();
+      w.remove();
     }
     lastCall = Date.now();
-    var sys = AGENT_PROMPT[agent] || TAB_PROMPT[tab];
-    var r = await fetch(brain, {
+    var r = await fetch("https://text.pollinations.ai/openai", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "openai", messages: [{ role: "system", content: sys }, { role: "user", content: String(prompt).slice(0, 2000) }], referrer: "shark-ai" })
+      body: JSON.stringify({ model: "openai", messages: [{ role: "system", content: AGENT_PROMPT[agent] || TAB_PROMPT[tab] }, { role: "user", content: String(prompt).slice(0, 2000) }], referrer: "shark-ai" })
     });
     if (!r.ok) throw new Error("busy");
     var d = await r.json();
@@ -126,100 +116,111 @@
     if (!c) throw new Error("empty");
     return c.trim();
   }
-
-  document.getElementById("ask").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    var input = document.getElementById("q");
-    var text = input.value.trim();
+  function send() {
+    var input = $("q"), text = input.value.trim();
     if (!text) return;
     input.value = "";
     say("me", text);
     var typing = say("ai", "…");
-    try {
-      var reply = await askAI(text);
-      typing.innerHTML = fmt(reply);
+    brain(text).then(function (reply) {
+      var h = esc(reply).replace(/```(\w*\n?)([\s\S]*?)```/g, function (_, l, c) { return "<pre><code>" + c.replace(/^\n/, "") + "</code></pre>"; });
+      typing.innerHTML = h.replace(/\n/g, "<br>");
       log.scrollTop = log.scrollHeight;
-      maybeLearn(text, reply);
-    } catch (_) {
-      typing.textContent = "The free AI is busy right now. Try one agent chip, or paste your error and I'll still read it.";
+      learn(text, reply);
+    }).catch(function () {
+      typing.textContent = "The free AI is busy. Try again in a bit — or paste your error and I'll still read it.";
+    });
+  }
+  $("send-btn").addEventListener("click", send);
+  $("q").addEventListener("keydown", function (e) { if (e.key === "Enter") send(); });
+  function learn(text, reply) {
+    var t = text.toLowerCase();
+    if (tab === "plan" && /plan|feature|user/.test(t)) store.set("shark-stage-plan", true);
+    if (tab === "deploy" && /live|deployed|github\.io|vercel|render/.test(t + " " + reply.toLowerCase())) store.set("shark-stage-deploy", true);
+    if (tab === "launch" && /posted|shared|users|signup/.test(t)) store.set("shark-users", Math.min(GOAL, goal() + 10));
+    renderStages(); renderGoal();
+    /* If the Coder wrote a file, offer it in Preview. */
+    var m = reply.match(/```(?:html)?\n([\s\S]*?)```/);
+    if (m && m[1].trim().length > 40) {
+      $("pv-code").value = m[1].trim();
+      show("pv");
+      runPreview();
     }
+  }
+
+  /* ---------- agent sheet ---------- */
+  var aSheet = $("agent-sheet");
+  $("agent-btn").addEventListener("click", function () { aSheet.hidden = false; });
+  aSheet.addEventListener("click", function (e) {
+    if (e.target === aSheet) { aSheet.hidden = true; return; }
+    var b = e.target.closest("[data-agent]");
+    if (!b) return;
+    agent = b.dataset.agent || null;
+    agentBtn();
+    aSheet.hidden = true;
+    if (agent) say("ai", "Agent set: **" + b.textContent.trim().split(" ")[0] + "**. What are we building?");
   });
 
-  /* Small wins auto-mark stages: a plan written, a deploy link shared… */
-  function maybeLearn(text, reply) {
-    var t = text.toLowerCase();
-    if (tab === "plan" && /plan|feature|user/.test(t)) markStage("plan");
-    if (tab === "deploy" && /live|deployed|github\.io|vercel|render/.test(t + " " + reply.toLowerCase())) markStage("deploy");
-    if (tab === "launch" && /posted|shared|users|signup/.test(t)) {
-      var n = goal();
-      if (n < GOAL) { store.set("shark-users", Math.min(GOAL, n + 10)); renderGoal(); }
-    }
-    if (/deploy|github pages|render|apk|play store/i.test(reply)) {
-      /* the deploy agent tends to finish its job — count it */
-    }
-  }
+  /* ---------- + sheet ---------- */
+  var pSheet = $("plus-sheet");
+  $("plus-btn").addEventListener("click", function () { pSheet.hidden = false; });
+  pSheet.addEventListener("click", function (e) {
+    if (e.target === pSheet) { pSheet.hidden = true; return; }
+    if (e.target.closest("#p-paste")) { show("pv"); $("pv-code").focus(); }
+    if (e.target.closest("#p-users")) setUsers();
+    if (e.target.closest("#p-clear")) { log.innerHTML = ""; empty.style.display = ""; }
+    pSheet.hidden = true;
+  });
 
   /* ---------- preview ---------- */
-  var code = document.getElementById("pv-code"), frame = document.getElementById("pv-frame");
   function runPreview() {
-    var html = code.value;
+    var html = $("pv-code").value;
     if (!/<html/i.test(html)) html = "<!DOCTYPE html><html><body>" + html + "</body></html>";
-    frame.srcdoc = html;
+    $("pv-frame").srcdoc = html;
   }
-  document.getElementById("pv-run").addEventListener("click", runPreview);
-  document.getElementById("pv-clear").addEventListener("click", function () { code.value = ""; frame.removeAttribute("srcdoc"); });
-  document.getElementById("pv-save").addEventListener("click", function () {
-    var name = prompt("File name?", "index.html") || "index.html";
+  $("pv-run").addEventListener("click", runPreview);
+  $("pv-clear").addEventListener("click", function () { $("pv-code").value = ""; $("pv-frame").removeAttribute("srcdoc"); });
+  $("pv-save").addEventListener("click", function () {
     var a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([code.value], { type: "text/html" }));
-    a.download = name; a.click();
+    a.href = URL.createObjectURL(new Blob([$("pv-code").value], { type: "text/html" }));
+    a.download = (prompt("File name?", "index.html") || "index.html");
+    a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
   });
 
-  /* ---------- GitHub (token on this device only) ---------- */
-  var ghToken = function () { return store.get("shark-gh", ""); };
-  async function gh(path, opts) {
-    var r = await fetch("https://api.github.com" + path, Object.assign({ headers: { "Accept": "application/vnd.github+json", "Authorization": "Bearer " + ghToken() } }, opts || {}));
-    if (!r.ok) throw new Error("GitHub said " + r.status);
+  /* ---------- GitHub ---------- */
+  function token() { return store.get("shark-gh", ""); }
+  async function gh(path) {
+    var r = await fetch("https://api.github.com" + path, { headers: { "Accept": "application/vnd.github+json", "Authorization": "Bearer " + token() } });
+    if (!r.ok) throw new Error(r.status);
     return r.json();
   }
   async function renderStatus() {
-    var el = document.getElementById("gh-status");
-    if (!ghToken()) { el.textContent = "Not connected. Connect GitHub to pull your repos and push from Shark."; return; }
-    try {
-      var me = await gh("/user");
-      el.textContent = "Connected as " + me.login + ". Your repos load below.";
-    } catch (_) {
-      el.textContent = "Saved token didn't work. Connect again.";
-      store.set("shark-gh", "");
-    }
-  }
-  async function listRepos() {
-    var box = document.getElementById("repo-list");
-    if (!ghToken()) { box.innerHTML = ""; say("ai", "Connect GitHub first — tap Connect and paste a token."); return; }
-    box.innerHTML = "<p class='hint'>Loading…</p>";
-    try {
-      var repos = await gh("/user/repos?per_page=20&sort=updated");
-      box.innerHTML = repos.map(function (r) {
-        return '<div class="repo"><span>📦</span><span><b>' + esc(r.name) + "</b><br><small>" + esc(r.private ? "private" : "public") + (r.description ? " · " + esc(r.description.slice(0, 60)) : "") + "</small></span></div>";
-      }).join("") || "<p class='hint'>No repos yet.</p>";
-    } catch (_) {
-      box.innerHTML = "<p class='hint'>Couldn't load repos. Check the token.</p>";
-    }
+    if (!token()) { $("gh-status").textContent = "Not connected."; return; }
+    try { var me = await gh("/user"); $("gh-status").textContent = "Connected as " + me.login + "."; $("dr-user").textContent = me.login; }
+    catch (_) { $("gh-status").textContent = "Token didn't work. Connect again."; store.set("shark-gh", ""); }
   }
   function connectFlow() {
-    var t = prompt("Paste a GitHub personal access token (Settings → Developer settings → Tokens, tick 'repo'). It stays on this device only.");
+    var t = prompt("Paste a GitHub token (Settings → Developer settings → Tokens, tick 'repo'). Stays on this device only.");
     if (!t) return;
     store.set("shark-gh", t.trim());
     renderStatus(); listRepos();
-    say("ai", "GitHub connected. Your repos are below. Shark can read them and help you push.");
   }
-  document.getElementById("gh-btn").addEventListener("click", connectFlow);
-  document.getElementById("gh-connect").addEventListener("click", connectFlow);
-  document.getElementById("gh-repos").addEventListener("click", listRepos);
+  async function listRepos() {
+    var box = $("repo-list");
+    if (!token()) { say("ai", "Connect GitHub first — open the menu and tap Connect."); openDrawer(true); return; }
+    box.innerHTML = "<p style='font-size:12px;color:var(--muted)'>Loading…</p>";
+    try {
+      var repos = await gh("/user/repos?per_page=20&sort=updated");
+      box.innerHTML = repos.map(function (r) {
+        return '<div class="repo">📦 <b>' + esc(r.name) + "</b> <small>" + (r.private ? "private" : "public") + "</small></div>";
+      }).join("") || "<p style='font-size:12px'>No repos.</p>";
+    } catch (_) { box.innerHTML = "<p style='font-size:12px'>Couldn't load. Check the token.</p>"; }
+  }
+  $("gh-connect").addEventListener("click", connectFlow);
+  $("gh-repos").addEventListener("click", listRepos);
 
   renderGoal(); renderStages(); renderStatus();
-  code.value = "<h1>Hello from Shark 🦈</h1><p>Edit me, hit Run.</p>";
+  $("pv-code").value = "<h1>Hello from Shark 🦈</h1><p>Edit me, hit Run.</p>";
   runPreview();
-  say("ai", "I'm Shark. Tell me your app idea — I'll plan it, code it with you, get it online, fix it, and push it to your first 10,000 users. Start anywhere: pick a tab, or tap an agent.");
 })();

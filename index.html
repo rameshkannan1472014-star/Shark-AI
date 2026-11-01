@@ -3,72 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#071019">
-<title>Shark — Idea to 10,000 users</title>
+<meta name="theme-color" content="#070d14">
+<title>Shark — Let's build</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./style.css?v=2">
+<link rel="stylesheet" href="./style.css?v=4">
 </head>
 <body>
-<header class="top">
-  <div class="brand"><span class="fin">🦈</span><div><h1>Shark<span> · AI</span></h1><p>Idea → 10,000 users</p></div></div>
-  <button id="gh-btn" class="pill" type="button">Connect GitHub</button>
-</header>
+<div class="app">
 
-<section class="goal card">
-  <div class="goal-row">
-    <div><small>YOUR GOAL</small><strong id="goal-n">0 / 10,000 users</strong></div>
-    <button class="pill ghost" id="goal-edit" type="button">Set users</button>
+  <header class="top">
+    <button id="menu-btn" class="icon-btn" type="button" aria-label="Menu">≡</button>
+    <div class="seg">
+      <button id="seg-chat" class="on" type="button">💬 Chat</button>
+      <button id="seg-pv" type="button">👁 Preview</button>
+    </div>
+    <div class="top-bal"></div>
+  </header>
+
+  <div id="scrim" class="scrim"></div>
+  <aside id="drawer" class="drawer" aria-label="Menu">
+    <div class="dr-head"><span class="fin">🦈</span><div><b>Shark</b><small id="dr-user">Idea → 10,000 users</small></div></div>
+    <div class="dr-goal">
+      <small>YOUR GOAL</small>
+      <strong id="goal-n">0 / 10,000 users</strong>
+      <div class="bar"><span id="goal-fill"></span></div>
+      <button class="link" id="goal-edit" type="button">Set users</button>
+    </div>
+    <nav id="stages" class="dr-stages" aria-label="Stages"></nav>
+    <div class="dr-sec">
+      <b>GitHub</b>
+      <p id="gh-status">Not connected.</p>
+      <div class="row">
+        <button class="pill" id="gh-connect" type="button">Connect</button>
+        <button class="pill ghost" id="gh-repos" type="button">My repos</button>
+      </div>
+      <div id="repo-list" class="repos"></div>
+    </div>
+  </aside>
+
+  <!-- CHAT VIEW -->
+  <main id="view-chat" class="view">
+    <div id="empty" class="empty">
+      <div class="logo-box">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <rect x="8" y="8" width="104" height="104" rx="26" fill="#f2f6fb"/>
+          <path d="M28 78 C34 54 52 34 88 30 L80 40 L90 42 L78 48 C70 60 52 74 30 80 Z" fill="#101418"/>
+          <path d="M52 40 L60 22 L66 40 Z" fill="#101418"/>
+          <circle cx="78" cy="46" r="2.4" fill="#fff"/>
+          <path d="M40 82 C48 86 60 86 70 80" stroke="#101418" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>Shark</h2>
+      <p>What shall we build?</p>
+    </div>
+    <div id="log" class="log" aria-live="polite"></div>
+  </main>
+
+  <!-- PREVIEW VIEW -->
+  <main id="view-pv" class="view" hidden>
+    <div class="pv-bar">
+      <button class="pill ghost" id="pv-run" type="button">▶ Run</button>
+      <button class="pill ghost" id="pv-clear" type="button">Clear</button>
+      <button class="pill ghost" id="pv-save" type="button">Save</button>
+    </div>
+    <textarea id="pv-code" spellcheck="false" placeholder="<h1>Hello from Shark</h1>"></textarea>
+    <iframe id="pv-frame" title="Preview" sandbox="allow-scripts"></iframe>
+  </main>
+
+  <footer class="composer">
+    <button id="plus-btn" class="cbtn" type="button" aria-label="More">+</button>
+    <input id="q" type="text" placeholder="Let's build…" autocomplete="off" maxlength="1000" enterkeyhint="send">
+    <button id="agent-btn" class="agent" type="button">Agent</button>
+    <button id="send-btn" class="cbtn send" type="submit" aria-label="Send">↑</button>
+  </footer>
+
+  <div id="agent-sheet" class="sheet" hidden>
+    <div class="sheet-card">
+      <button data-agent="planner" type="button">🧭 Planner <small>idea → 1-week plan</small></button>
+      <button data-agent="coder" type="button">💻 Coder <small>writes working code</small></button>
+      <button data-agent="reviewer" type="button">🔍 Reviewer <small>finds bugs</small></button>
+      <button data-agent="deployer" type="button">🚀 Deployer <small>puts it online</small></button>
+      <button data-agent="" type="button" class="off">✕ Auto <small>Shark picks</small></button>
+    </div>
   </div>
-  <div class="bar"><span id="goal-fill"></span></div>
-  <p class="hint">Every launch step you finish moves this. Shark stays until it's full.</p>
-</section>
 
-<nav class="stages" id="stages" aria-label="Launch stages"></nav>
-
-<main class="card chat-card">
-  <div class="tabs">
-    <button class="tab is-on" data-tab="plan" type="button">Plan</button>
-    <button class="tab" data-tab="code" type="button">Code</button>
-    <button class="tab" data-tab="deploy" type="button">Deploy</button>
-    <button class="tab" data-tab="bugs" type="button">Bugs</button>
-    <button class="tab" data-tab="launch" type="button">Launch</button>
+  <div id="plus-sheet" class="sheet" hidden>
+    <div class="sheet-card">
+      <button id="p-paste" type="button">📋 Paste code to preview</button>
+      <button id="p-users" type="button">🎯 Set user count</button>
+      <button id="p-clear" type="button">🧹 Clear chat</button>
+    </div>
   </div>
-  <div id="log" class="log" aria-live="polite"></div>
-  <form id="ask" class="ask">
-    <input id="q" type="text" placeholder="Describe your app idea, or ask for the next step…" autocomplete="off" maxlength="1000" enterkeyhint="send">
-    <button type="submit" aria-label="Send">➤</button>
-  </form>
-  <div class="row">
-    <button class="chip" data-agent="planner" type="button">🧭 Planner</button>
-    <button class="chip" data-agent="coder" type="button">💻 Coder</button>
-    <button class="chip" data-agent="reviewer" type="button">🔍 Reviewer</button>
-    <button class="chip" data-agent="deployer" type="button">🚀 Deployer</button>
-  </div>
-</main>
 
-<section class="card">
-  <h2>👁 Preview</h2>
-  <p class="hint">Paste any project file, or ask the Coder to write one — it runs here instantly.</p>
-  <div class="preview-bar">
-    <button class="pill ghost" id="pv-run" type="button">▶ Run</button>
-    <button class="pill ghost" id="pv-clear" type="button">Clear</button>
-    <button class="pill ghost" id="pv-save" type="button">Save file</button>
-  </div>
-  <textarea id="pv-code" spellcheck="false" placeholder="&lt;h1&gt;Hello from Shark&lt;/h1&gt;"></textarea>
-  <iframe id="pv-frame" title="Project preview" sandbox="allow-scripts"></iframe>
-</section>
-
-<section class="card">
-  <h2>📁 Project &amp; GitHub</h2>
-  <p class="hint" id="gh-status">Not connected. Connect GitHub to pull your repos and push from Shark.</p>
-  <div class="row">
-    <button class="pill" id="gh-connect" type="button">Connect</button>
-    <button class="pill ghost" id="gh-repos" type="button">My repos</button>
-  </div>
-  <div id="repo-list" class="repos"></div>
-</section>
-
-<script src="./app.js?v=1"></script>
+</div>
+<script src="./app.js?v=4"></script>
 </body>
 </html>
