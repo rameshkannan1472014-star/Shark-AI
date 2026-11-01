@@ -107,3 +107,14 @@ body{margin:0;background:var(--bg);color:var(--text);min-height:100vh}
   font-size:14px;cursor:pointer;text-align:left}
 .sheet-card button small{margin-left:auto;color:var(--muted);font-size:11px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ——— preview: AI output only ——— */
+.pv-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+.logo-box.sm{width:84px;height:84px;border-radius:24px}
+.logo-box.sm svg{width:62px;height:62px}
+#view-pv{display:flex;flex-direction:column}
+.view[hidden]{display:none!important}
+#view-pv[hidden]{display:none}
+#pv-frame{flex:1;min-height:0;border:1px solid var(--line);border-radius:14px;background:#fff}
+#pv-frame[hidden]{display:none}

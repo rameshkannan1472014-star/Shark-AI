@@ -142,9 +142,10 @@
     /* If the Coder wrote a file, offer it in Preview. */
     var m = reply.match(/```(?:html)?\n([\s\S]*?)```/);
     if (m && m[1].trim().length > 40) {
-      $("pv-code").value = m[1].trim();
+      lastCode = m[1].trim();
       show("pv");
       runPreview();
+      say("ai", "Done — it's live in Preview. 👆 Tell me what to change next.");
     }
   }
 
@@ -166,27 +167,26 @@
   $("plus-btn").addEventListener("click", function () { pSheet.hidden = false; });
   pSheet.addEventListener("click", function (e) {
     if (e.target === pSheet) { pSheet.hidden = true; return; }
-    if (e.target.closest("#p-paste")) { show("pv"); $("pv-code").focus(); }
+    if (e.target.closest("#p-paste")) {
+      var pasted = prompt("Paste the code to preview:");
+      if (pasted) { lastCode = pasted; show("pv"); runPreview(); }
+    }
     if (e.target.closest("#p-users")) setUsers();
     if (e.target.closest("#p-clear")) { log.innerHTML = ""; empty.style.display = ""; }
     pSheet.hidden = true;
   });
 
-  /* ---------- preview ---------- */
+  /* ---------- preview: only what the AI builds ---------- */
+  var lastCode = "";
   function runPreview() {
-    var html = $("pv-code").value;
+    var frame = $("pv-frame"), ph = $("pv-empty");
+    if (!lastCode.trim()) { frame.hidden = true; frame.removeAttribute("srcdoc"); if (ph) ph.hidden = false; return; }
+    var html = lastCode;
     if (!/<html/i.test(html)) html = "<!DOCTYPE html><html><body>" + html + "</body></html>";
-    $("pv-frame").srcdoc = html;
+    frame.srcdoc = html;
+    frame.hidden = false;
+    if (ph) ph.hidden = true;
   }
-  $("pv-run").addEventListener("click", runPreview);
-  $("pv-clear").addEventListener("click", function () { $("pv-code").value = ""; $("pv-frame").removeAttribute("srcdoc"); });
-  $("pv-save").addEventListener("click", function () {
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([$("pv-code").value], { type: "text/html" }));
-    a.download = (prompt("File name?", "index.html") || "index.html");
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-  });
 
   /* ---------- GitHub ---------- */
   function token() { return store.get("shark-gh", ""); }
@@ -221,6 +221,5 @@
   $("gh-repos").addEventListener("click", listRepos);
 
   renderGoal(); renderStages(); renderStatus();
-  $("pv-code").value = "<h1>Hello from Shark 🦈</h1><p>Edit me, hit Run.</p>";
   runPreview();
 })();

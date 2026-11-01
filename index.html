@@ -7,7 +7,7 @@
 <title>Shark — Let's build</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./style.css?v=4">
+<link rel="stylesheet" href="./style.css?v=6">
 </head>
 <body>
 <div class="app">
@@ -62,13 +62,19 @@
 
   <!-- PREVIEW VIEW -->
   <main id="view-pv" class="view" hidden>
-    <div class="pv-bar">
-      <button class="pill ghost" id="pv-run" type="button">▶ Run</button>
-      <button class="pill ghost" id="pv-clear" type="button">Clear</button>
-      <button class="pill ghost" id="pv-save" type="button">Save</button>
+    <div id="pv-empty" class="pv-empty">
+      <div class="logo-box sm">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <rect x="8" y="8" width="104" height="104" rx="26" fill="#f2f6fb"/>
+          <path d="M28 78 C34 54 52 34 88 30 L80 40 L90 42 L78 48 C70 60 52 74 30 80 Z" fill="#101418"/>
+          <path d="M52 40 L60 22 L66 40 Z" fill="#101418"/>
+          <circle cx="78" cy="46" r="2.4" fill="#fff"/>
+          <path d="M40 82 C48 86 60 86 70 80" stroke="#101418" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p>Nothing to preview yet.<br>Ask the AI to build something in Chat.</p>
     </div>
-    <textarea id="pv-code" spellcheck="false" placeholder="<h1>Hello from Shark</h1>"></textarea>
-    <iframe id="pv-frame" title="Preview" sandbox="allow-scripts"></iframe>
+    <iframe id="pv-frame" title="Preview" sandbox="allow-scripts" hidden></iframe>
   </main>
 
   <footer class="composer">
@@ -97,6 +103,6 @@
   </div>
 
 </div>
-<script src="./app.js?v=4"></script>
+<script src="./app.js?v=5"></script>
 </body>
 </html>
