@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#071019">
+<title>Shark — Idea to 10,000 users</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css?v=1">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="fin">🦈</span><div><h1>Shark</h1><p>Idea → 10,000 users</p></div></div>
+  <button id="gh-btn" class="pill" type="button">Connect GitHub</button>
+</header>
+
+<section class="goal card">
+  <div class="goal-row">
+    <div><small>YOUR GOAL</small><strong id="goal-n">0 / 10,000 users</strong></div>
+    <button class="pill ghost" id="goal-edit" type="button">Set users</button>
+  </div>
+  <div class="bar"><span id="goal-fill"></span></div>
+  <p class="hint">Every launch step you finish moves this. Shark stays until it's full.</p>
+</section>
+
+<nav class="stages" id="stages" aria-label="Launch stages"></nav>
+
+<main class="card chat-card">
+  <div class="tabs">
+    <button class="tab is-on" data-tab="plan" type="button">Plan</button>
+    <button class="tab" data-tab="code" type="button">Code</button>
+    <button class="tab" data-tab="deploy" type="button">Deploy</button>
+    <button class="tab" data-tab="bugs" type="button">Bugs</button>
+    <button class="tab" data-tab="launch" type="button">Launch</button>
+  </div>
+  <div id="log" class="log" aria-live="polite"></div>
+  <form id="ask" class="ask">
+    <input id="q" type="text" placeholder="Describe your app idea, or ask for the next step…" autocomplete="off" maxlength="1000" enterkeyhint="send">
+    <button type="submit" aria-label="Send">➤</button>
+  </form>
+  <div class="row">
+    <button class="chip" data-agent="planner" type="button">🧭 Planner</button>
+    <button class="chip" data-agent="coder" type="button">💻 Coder</button>
+    <button class="chip" data-agent="reviewer" type="button">🔍 Reviewer</button>
+    <button class="chip" data-agent="deployer" type="button">🚀 Deployer</button>
+  </div>
+</main>
+
+<section class="card">
+  <h2>👁 Preview</h2>
+  <p class="hint">Paste any project file, or ask the Coder to write one — it runs here instantly.</p>
+  <div class="preview-bar">
+    <button class="pill ghost" id="pv-run" type="button">▶ Run</button>
+    <button class="pill ghost" id="pv-clear" type="button">Clear</button>
+    <button class="pill ghost" id="pv-save" type="button">Save file</button>
+  </div>
+  <textarea id="pv-code" spellcheck="false" placeholder="&lt;h1&gt;Hello from Shark&lt;/h1&gt;"></textarea>
+  <iframe id="pv-frame" title="Project preview" sandbox="allow-scripts"></iframe>
+</section>
+
+<section class="card">
+  <h2>📁 Project &amp; GitHub</h2>
+  <p class="hint" id="gh-status">Not connected. Connect GitHub to pull your repos and push from Shark.</p>
+  <div class="row">
+    <button class="pill" id="gh-connect" type="button">Connect</button>
+    <button class="pill ghost" id="gh-repos" type="button">My repos</button>
+  </div>
+  <div id="repo-list" class="repos"></div>
+</section>
+
+<script src="./app.js?v=1"></script>
+</body>
+</html>

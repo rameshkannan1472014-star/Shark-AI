@@ -1,0 +1,67 @@
+:root{
+  color-scheme:dark;
+  --bg:#071019; --panel:#0e1a26; --line:rgba(125,211,252,.14);
+  --text:#eaf6ff; --muted:#8fb3c9; --accent:#22d3ee; --accent2:#3b82f6;
+  --radius:18px;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);
+  background:radial-gradient(ellipse at 15% 0%,rgba(34,211,238,.14),transparent 45%),var(--bg);
+  padding-bottom:40px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 6px;max-width:720px;margin:auto}
+.brand{display:flex;gap:12px;align-items:center}
+.fin{font-size:34px;filter:drop-shadow(0 4px 12px rgba(34,211,238,.4))}
+.brand h1{margin:0;font-size:24px;letter-spacing:-.03em}
+.brand p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.card{max-width:720px;margin:14px auto;background:linear-gradient(180deg,#0d1926,#0a141e);
+  border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.card h2{margin:0 0 4px;font-size:16px}
+.goal-row{display:flex;align-items:center;justify-content:space-between}
+.goal-row small{display:block;font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.goal-row strong{font-size:19px}
+.bar{height:10px;border-radius:99px;background:#122636;margin:12px 0 6px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .5s ease}
+.hint{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.5}
+.pill{border:1px solid rgba(125,211,252,.35);background:linear-gradient(135deg,#0e7490,#1d4ed8);
+  color:#fff;border-radius:99px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.pill.ghost{background:transparent;color:#bfe9ff}
+.stages{max-width:720px;margin:4px auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 16px}
+.stage{border:1px solid var(--line);background:#0c1824;border-radius:12px;padding:8px 4px;
+  font-size:10.5px;color:var(--muted);text-align:center;cursor:pointer}
+.stage b{display:block;font-size:15px;margin-bottom:2px}
+.stage.done{border-color:#22d3ee;color:#d8f6ff;background:rgba(34,211,238,.1)}
+.stage.now{border-color:#fff;color:#fff;box-shadow:0 0 0 2px rgba(34,211,238,.3)}
+.chat-card{padding-bottom:12px}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tab{flex:1;border:1px solid var(--line);background:transparent;color:var(--muted);
+  border-radius:10px;padding:9px 4px;font-size:12.5px;cursor:pointer;min-width:60px}
+.tab.is-on{background:rgba(34,211,238,.15);color:#fff;border-color:var(--accent)}
+.log{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:13px;font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:#1d4ed8;color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:#13273a;border-bottom-left-radius:4px}
+.msg pre{background:#081018;padding:8px;border-radius:8px;overflow-x:auto;font-size:12px}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;border:1px solid var(--line);background:#0a141e;color:var(--text);
+  border-radius:99px;padding:11px 15px;font-size:13.5px;outline:none}
+.ask input:focus{border-color:var(--accent)}
+.ask button{width:44px;border-radius:50%;border:0;font-size:16px;cursor:pointer;
+  background:linear-gradient(135deg,#0e7490,#1d4ed8);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:#0c1824;color:#cfeaff;border-radius:99px;
+  padding:8px 13px;font-size:12px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.preview-bar{display:flex;gap:8px;margin:8px 0}
+#pv-code{width:100%;min-height:120px;background:#060c13;color:#c9f5ff;border:1px solid var(--line);
+  border-radius:12px;padding:10px;font-family:ui-monospace,monospace;font-size:12px}
+#pv-frame{width:100%;height:220px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:8px}
+.repos{display:grid;gap:8px;margin-top:10px}
+.repo{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);
+  border-radius:12px;font-size:13px}
+.repo small{color:var(--muted)}
+.repo button{margin-left:auto}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
