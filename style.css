@@ -108,6 +108,42 @@ body{margin:0;background:var(--bg);color:var(--text);min-height:100vh}
 .sheet-card button small{margin-left:auto;color:var(--muted);font-size:11px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
+/* ——— apply bar ——— */
+.pv-apply{display:flex;align-items:center;gap:8px;background:rgba(45,212,191,.1);
+  border:1px solid rgba(45,212,191,.4);border-radius:14px;padding:10px 12px;
+  font-size:12.5px;margin-bottom:10px}
+.pv-apply[hidden]{display:none}
+.pv-apply span{flex:1}
+.pv-apply button{border:0;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer}
+#pv-keep{background:#0ea5e9;color:#fff}
+#pv-drop{background:transparent;color:var(--muted);border:1px solid var(--line)}
+
+/* ——— composer + suggestions ——— */
+.cwrap{flex:1;min-width:0;position:relative}
+.suggest{position:absolute;left:0;right:0;bottom:calc(100% + 8px);background:#0d1824;
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;z-index:20}
+.suggest[hidden]{display:none}
+.suggest button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;
+  color:var(--text);padding:10px 12px;font-size:13px;cursor:pointer;text-align:left}
+.suggest button:hover{background:#14293d}
+.suggest b{color:var(--accent);font-family:ui-monospace,monospace}
+.suggest small{color:var(--muted)}
+
+/* ——— chats + settings ——— */
+.chats{display:grid;gap:6px;margin-top:10px}
+.chat-row{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--panel);
+  color:var(--text);border-radius:11px;padding:9px 11px;font-size:12.5px;cursor:pointer;text-align:left}
+.chat-row.on{border-color:var(--accent)}
+.chat-row .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ——— light theme ——— */
+body.light{--bg:#eef4f9;--panel:#ffffff;--text:#0b1c2b;--muted:#57748c;--line:rgba(2,132,199,.18)}
+body.light .msg.ai{background:#e6f3fa;border-color:rgba(2,132,199,.2)}
+body.light .drawer{background:#f7fbfe}
+body.light .sheet-card{background:#ffffff}
+body.light .suggest{background:#fff}
+body.light .suggest button:hover{background:#eef6fb}
+
 /* ——— preview: AI output only ——— */
 .pv-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:10px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}

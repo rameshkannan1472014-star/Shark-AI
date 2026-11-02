@@ -7,7 +7,7 @@
 <title>Shark — Let's build</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./style.css?v=6">
+<link rel="stylesheet" href="./style.css?v=8">
 </head>
 <body>
 <div class="app">
@@ -31,6 +31,14 @@
       <button class="link" id="goal-edit" type="button">Set users</button>
     </div>
     <nav id="stages" class="dr-stages" aria-label="Stages"></nav>
+    <div class="dr-sec">
+      <b>💬 Chats</b>
+      <div class="row" style="margin-top:8px">
+        <button class="pill" id="chat-new" type="button">+ New chat</button>
+        <button class="pill ghost" id="open-settings" type="button">⚙ Settings</button>
+      </div>
+      <div id="chat-list" class="chats"></div>
+    </div>
     <div class="dr-sec">
       <b>GitHub</b>
       <p id="gh-status">Not connected.</p>
@@ -62,6 +70,11 @@
 
   <!-- PREVIEW VIEW -->
   <main id="view-pv" class="view" hidden>
+    <div id="pv-apply" class="pv-apply" hidden>
+      <span id="pv-apply-txt">✨ Previewing new changes…</span>
+      <button id="pv-keep" type="button">Apply ✓</button>
+      <button id="pv-drop" type="button">Discard</button>
+    </div>
     <div id="pv-empty" class="pv-empty">
       <div class="logo-box sm">
         <svg viewBox="0 0 120 120" aria-hidden="true">
@@ -79,7 +92,10 @@
 
   <footer class="composer">
     <button id="plus-btn" class="cbtn" type="button" aria-label="More">+</button>
-    <input id="q" type="text" placeholder="Let's build…" autocomplete="off" maxlength="1000" enterkeyhint="send">
+    <div class="cwrap">
+      <input id="q" type="text" placeholder="Let's build…  ( / for commands, @ for context )" autocomplete="off" maxlength="1000" enterkeyhint="send">
+      <div id="suggest" class="suggest" hidden></div>
+    </div>
     <button id="agent-btn" class="agent" type="button">Agent</button>
     <button id="send-btn" class="cbtn send" type="submit" aria-label="Send">↑</button>
   </footer>
@@ -90,6 +106,7 @@
       <button data-agent="coder" type="button">💻 Coder <small>writes working code</small></button>
       <button data-agent="reviewer" type="button">🔍 Reviewer <small>finds bugs</small></button>
       <button data-agent="deployer" type="button">🚀 Deployer <small>puts it online</small></button>
+      <button data-agent="social" type="button">📣 Social <small>posts that grow</small></button>
       <button data-agent="" type="button" class="off">✕ Auto <small>Shark picks</small></button>
     </div>
   </div>
@@ -103,6 +120,6 @@
   </div>
 
 </div>
-<script src="./app.js?v=5"></script>
+<script src="./app.js?v=7"></script>
 </body>
 </html>
