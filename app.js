@@ -135,18 +135,30 @@
   }
   function say(role, text, nopersist) {
     empty.style.display = "none";
+    /* Thinking bubbles never become chat history. */
+    if (role === "ai" && (text === "…" || /Catching breath/.test(String(text)))) {
+      return thinkBubble();
+    }
     var d = paint(role, text);
-    if (!nopersist && (role === "me" || role === "ai") && !/^…$/.test(String(text)) && !/Catching breath/.test(String(text))) persist(role, text);
     return d;
   }
   var lastCall = 0;
   var TAB_BRIEF = { plan: "🧭 Planner", code: "💻 Coder", deploy: "🚀 Deployer", bugs: "🔍 Bug Hunter", launch: "📣 Launch Coach" };
+  /* ---------- memory: last 8 messages always travel with the request ---------- */
+  function historyMsgs() {
+    var c = cur();
+    if (!c || !c.msgs.length) return [];
+    return c.msgs.filter(function (m) { return m.t !== "…" && !/Catching breath/.test(m.t); }).slice(-8).map(function (m) {
+      return { role: m.r === "me" ? "user" : "assistant", content: String(m.t).replace(/```[\s\S]*?```/g, "[code]").slice(0, 800) };
+    });
+  }
   async function brain(prompt) {
     var gap = 31000 - (Date.now() - lastCall);
     if (gap > 0) {
-      var w = say("ai", "Catching breath… answering in " + Math.ceil(gap / 1000) + "s (free AI limit).");
+      var w = thinkBubble();
+      var secs = Math.ceil(gap / 1000);
+      log.replaceChild(paint("ai", "Catching breath… answering in " + secs + "s (free AI limit)."), w);
       await new Promise(function (r) { setTimeout(r, gap); });
-      w.remove();
     }
     lastCall = Date.now();
     var sys = AGENT_PROMPT[agent] || TAB_PROMPT[tab];
@@ -154,9 +166,12 @@
     if ((agent === "coder" || tab === "code") && /\b(build|make|create|generate|design|page|app|website|button|form)\b/i.test(prompt)) {
       sys += "\n\nIMPORTANT: answer with runnable single-file HTML in exactly one ```html fenced block, so it can be previewed.";
     }
+    var msgs = [{ role: "system", content: sys + "\n\nThe user may refer to something from earlier in this chat (like 'his net worth' after asking about a person). Always use the conversation history to resolve who or what they mean — never ask for a name they already gave." }]
+      .concat(historyMsgs())
+      .concat([{ role: "user", content: String(prompt).slice(0, 2000) }]);
     var r = await fetch("https://text.pollinations.ai/openai", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: model(), messages: [{ role: "system", content: sys }, { role: "user", content: String(prompt).slice(0, 2000) }], referrer: "shark-ai" })
+      body: JSON.stringify({ model: model(), messages: msgs, referrer: "shark-ai" })
     });
     if (!r.ok) throw new Error("busy");
     var d = await r.json();
@@ -266,6 +281,15 @@
     if (k === "clear") { saveChats([]); cid = null; store.set("shark-cid", null); newChat(); }
   }
 
+  /* ---------- typing indicator: the shark swims while it thinks ---------- */
+  function thinkBubble() {
+    empty.style.display = "none";
+    var d = document.createElement("div");
+    d.className = "msg ai thinking";
+    d.innerHTML = '<span class="swim" aria-hidden="true">🦈<i>〜</i><i>〜</i><i>〜</i></span>';
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    return d;
+  }
   function send(forceAgent) {
     var input = $("q"), text = input.value.trim();
     if (!text) return;
@@ -280,11 +304,14 @@
     /* 'build/make/create X' always goes to the Coder, whatever the tab. */
     if (!agent && /\b(build|make|create|generate|design)\b/i.test(text)) agent = "coder";
     say("me", text);
-    var typing = say("ai", "…");
+    var typing = thinkBubble();
+    var myText = text;
     brain(text).then(function (reply) {
-      var h = esc(reply).replace(/```(\w*\n?)([\s\S]*?)```/g, function (_, l, c) { return "<pre><code>" + c.replace(/^\n/, "") + "</code></pre>"; });
-      typing.innerHTML = h.replace(/\n/g, "<br>");
+      var fresh = paint("ai", reply);
+      log.replaceChild(fresh, typing);
       log.scrollTop = log.scrollHeight;
+      persist("me", myText);
+      persist("ai", reply);
       learn(text, reply);
     }).catch(function () {
       typing.textContent = "The free AI is busy. Try again in a bit — or paste your error and I'll still read it.";
